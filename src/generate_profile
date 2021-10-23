@@ -1,21 +1,21 @@
+#!/usr/bin/env python3
+
 from PIL import Image, ImageOps
 import random
+from fire import *
 
 # Set the width and height of each quarter (The image is always square)
 dim = 10
 
-# Set the global colour so that each coloured pixel is monotone
-colour = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
-
-def quarter(dimension) -> Image:
+def quarter(dimension, colour) -> Image:
     # Initialize empty image
     one_quarter = Image.new("RGB", (dimension, dimension))
 
     # Loop over every pixel and set it to one of two colours
     for i in range(dimension):
         for j in range(dimension):
-            # Each pixel has a 50% chance of being coloured
+            # Each pixel has a 1/3rd chance of being coloured
             is_coloured = random.randint(0, 2)
             if is_coloured == 1:
                 one_quarter.putpixel((i, j), colour)
@@ -25,13 +25,15 @@ def quarter(dimension) -> Image:
     return one_quarter
 
 
-def generate_multiply_stitch() -> Image:
+def generate_multiply_stitch_save(dim: int = 10, name: str = "output"):
+    colour = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
     # Initialize the full image
     full_dim = dim * 2
     full_pfp = Image.new("RGB", (full_dim, full_dim))
 
     # Generate the 4 quarters by flipping and mirroring the first one
-    top_left = quarter(10)
+    top_left = quarter(dim, colour)
     top_right = ImageOps.mirror(top_left)
     bottom_left = ImageOps.flip(top_left)
     bottom_right = ImageOps.mirror(ImageOps.flip(top_left))
@@ -42,7 +44,16 @@ def generate_multiply_stitch() -> Image:
     full_pfp.paste(bottom_left, (0, dim))
     full_pfp.paste(bottom_right, (dim, dim))
 
-    return full_pfp
+    # Make sure we end in the right file extension
+    if name[4:] != ".png":
+        name += ".png"
+    full_pfp.save(name)
 
 
-generate_multiply_stitch().save("output.png")
+if __name__ == "__main__":
+    command_index = {
+        "generate": generate_multiply_stitch_save,
+        "g": generate_multiply_stitch_save,
+        "gen": generate_multiply_stitch_save
+    }
+    Fire(command_index)
