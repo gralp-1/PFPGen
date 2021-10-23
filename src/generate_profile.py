@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-
 from PIL import Image, ImageOps
 import random
-from fire import *
+import click
 
 # Set the width and height of each quarter (The image is always square)
 dim = 10
@@ -24,25 +23,27 @@ def quarter(dimension, colour) -> Image:
                 one_quarter.putpixel((i, j), (255, 255, 255))
     return one_quarter
 
-
-def generate_multiply_stitch_save(dim: int = 10, name: str = "output"):
+@click.command()
+@click.option("--size", default=10, prompt="Size of each mosaic of the image")
+@click.option("--name", default="output", prompt="Name of the output file")
+def genpic(size: int = 10, name: str = "output"):
     colour = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
     # Initialize the full image
-    full_dim = dim * 2
+    full_dim = size * 2
     full_pfp = Image.new("RGB", (full_dim, full_dim))
 
     # Generate the 4 quarters by flipping and mirroring the first one
-    top_left = quarter(dim, colour)
+    top_left = quarter(size, colour)
     top_right = ImageOps.mirror(top_left)
     bottom_left = ImageOps.flip(top_left)
     bottom_right = ImageOps.mirror(ImageOps.flip(top_left))
 
     # Stitch the 4 images together
     full_pfp.paste(top_left, (0, 0))
-    full_pfp.paste(top_right, (dim, 0))
-    full_pfp.paste(bottom_left, (0, dim))
-    full_pfp.paste(bottom_right, (dim, dim))
+    full_pfp.paste(top_right, (size, 0))
+    full_pfp.paste(bottom_left, (0, size))
+    full_pfp.paste(bottom_right, (size, size))
 
     # Make sure we end in the right file extension
     if name[4:] != ".png":
@@ -51,9 +52,4 @@ def generate_multiply_stitch_save(dim: int = 10, name: str = "output"):
 
 
 if __name__ == "__main__":
-    command_index = {
-        "generate": generate_multiply_stitch_save,
-        "g": generate_multiply_stitch_save,
-        "gen": generate_multiply_stitch_save
-    }
-    Fire(command_index)
+    genpic()
