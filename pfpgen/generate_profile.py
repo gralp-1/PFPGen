@@ -50,6 +50,5 @@ def genpic(size: int = 10, name: str = "output"):
         name += ".png"
     full_pfp.save(name)
 
-
 if __name__ == "__main__":
     genpic()
